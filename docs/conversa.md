@@ -77,3 +77,76 @@ O banco de dados utilizado tanto para os testes quanto para o sistema em si ser�
 > **Por fim, grave nossas conversas em docs/conversa.**
 >
 > **Qualquer dúvida me pergunte.**
+
+---
+
+## Atualização – Aumento da Quantidade de Testes
+
+> **Atualize o docs/ para aumentar a quantidade de testes para cada caso.**
+
+### Testes sem Banco de Dados
+
+**Caso 1 (`verificar_reposicao`):**
+> Coloque no planejamento a possibilidade de vir todos os produtos com a quantidade abaixo de 5 e mais um teste com alguma entrada inválida com mensagem "Dado inválido", por exemplo como uma quantidade negativa.
+
+Novos casos adicionados ao planejamento:
+- **Caso 4:** Todos os produtos com quantidade < 5 → retorna o total de produtos da lista.
+- **Caso 5:** Entrada inválida (quantidade negativa) → lança exceção com mensagem `"Dado inválido"`.
+
+---
+
+**Caso 2 (`calcular_percentual_vendas`):**
+> Coloque no planejamento a possibilidade de vir mais de um produto com a mesma quantidade de venda, logo mesmo percentual. Além disso, coloque também novos testes de vendas diferentes com a mesma quantidade vendida e vendas com o mesmo produto com quantidades diferentes.
+
+Novos casos adicionados ao planejamento:
+- **Caso 4:** Dois produtos com a mesma quantidade total vendida → ambos retornam o mesmo percentual (ex.: 50% cada).
+- **Caso 5:** Vendas com ids distintos mas mesma quantidade vendida por produto → cada produto retorna percentual igual.
+- **Caso 6:** Mesmo produto aparece em vendas distintas com quantidades diferentes → o total do produto é a soma de todas as ocorrências.
+
+---
+
+**Caso 3 (`calcular_total_mensal`):**
+> Coloque no planejamento a possibilidade com os valores vendidos iguais de produtos diferentes.
+
+Novo caso adicionado ao planejamento:
+- **Caso 4:** Vendas com valores iguais de produtos diferentes → retorna a soma correta de todos os valores.
+
+---
+
+**Caso 4 (`calcular_variacao_mensal`):**
+> Coloque no planejamento a possibilidade ter meses conseguintes com a mesma quantidade de venda, logo com a saída espera 0.0.
+
+Novo caso adicionado ao planejamento:
+- **Caso 4:** Dois meses consecutivos com o mesmo valor de venda → variação é `0.0`.
+
+---
+
+### Testes com Banco de Dados
+
+**Caso 1 (`filtrar_produtos`):**
+> Coloque no planejamento a possibilidade de filtrar por algo que não é uma categoria do dado.
+
+Novo caso adicionado ao planejamento:
+- **Caso 4:** Filtro por categoria inexistente nos dados (ex.: `categoria='Beleza'`) → retorna lista vazia.
+
+---
+
+**Caso 3 (`listar_produtos_ordenados`):**
+> Coloque no planejamento a possibilidade de listar categoria sem itens, apenas uma categoria com todos os produtos, colocar também se será listado quando receber uma entrada parcial (sh = shampoo).
+
+Novos casos adicionados ao planejamento:
+- **Caso 4:** Banco populado com apenas uma categoria (somente 'Higiene') → todos os produtos retornam ordenados por nome; nenhum item de 'Limpeza' aparece.
+- **Caso 5:** Busca por entrada parcial de nome do produto (ex.: `'sh'` → 'Shampoo') via `filtrar_produtos` com suporte a `LIKE '%sh%'`.
+
+---
+
+**Caso 4 (`listar_vendas_responsavel`):**
+> Coloque no planejamento a possibilidade de listar quando receber uma entrada parcial (ana = ana clara, juliana).
+
+Novo caso adicionado ao planejamento:
+- **Caso 4:** Busca por entrada parcial do nome do responsável (ex.: `'ana'` → Ana Clara, Juliana) utilizando `LIKE '%ana%'`; o fixture deve incluir os usuários extras necessários.
+
+---
+
+> **Grave novamente a conversa em docs/conversa.**
+
