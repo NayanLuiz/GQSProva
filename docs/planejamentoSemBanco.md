@@ -56,8 +56,11 @@ saída:   1   # apenas 'Sabonete' tem quantidade < 5
 | 1 | Lista com mix de quantidades (caso normal) | `(('Shampoo', 10), ('Condicionador', 5), ('Sabonete', 2))` | `1` |
 | 2 | Lista vazia | `()` | `0` |
 | 3 | Todos os produtos com quantidade ≥ 5 (nenhum precisa reposição) | `(('Shampoo', 10), ('Condicionador', 7), ('Sabonete', 5))` | `0` |
+| 4 | Todos os produtos com quantidade < 5 (todos precisam reposição) | `(('Shampoo', 1), ('Condicionador', 3), ('Sabonete', 0))` | `3` |
+| 5 | Entrada inválida — quantidade negativa | `(('Shampoo', -2), ('Condicionador', 3))` | Lança exceção com mensagem `"Dado inválido"` |
 
-> **Nota:** Quantidade exatamente igual a 5 **não** dispara reposição (condição é `< 5`, não `<= 5`).
+> **Nota:** Quantidade exatamente igual a 5 **não** dispara reposição (condição é `< 5`, não `<= 5`).  
+> **Nota:** Quantidades negativas são inválidas e devem ser rejeitadas com a mensagem `"Dado inválido"`.
 
 ---
 
@@ -94,6 +97,9 @@ saída: [(1, 0.6364), (2, 0.2727), (3, 0.0909), (4, 0.0)]
 | 1 | Lista normal com produto sem vendas (produto 4) | vendas acima, ids `[1,2,3,4]` | `[(1,≈0.6364),(2,≈0.2727),(3,≈0.0909),(4,0.0)]` |
 | 2 | Lista de vendas vazia — todos os produtos com 0% | `()`, ids `[1,2,3]` | `[(1,0.0),(2,0.0),(3,0.0)]` |
 | 3 | Apenas um produto e uma venda — 100% de participação | `((1, 1, 5),)`, ids `[1]` | `[(1,1.0)]` |
+| 4 | Dois produtos com a mesma quantidade total vendida — mesmo percentual | `((1, 1, 3), (1, 2, 3))`, ids `[1,2]` | `[(1,0.5),(2,0.5)]` |
+| 5 | Vendas diferentes (id_venda distintos) com a mesma quantidade vendida por produto | `((1, 1, 2), (2, 2, 2), (3, 3, 2))`, ids `[1,2,3]` | `[(1,≈0.3333),(2,≈0.3333),(3,≈0.3333)]` |
+| 6 | Mesmo produto em vendas distintas com quantidades diferentes | `((1, 1, 2), (2, 1, 8))`, ids `[1]` | `[(1,1.0)]` |
 
 ---
 
@@ -122,6 +128,7 @@ saída:   372.80
 | 1 | Lista normal com múltiplas vendas | `((1,50.50),(2,200.95),(3,20.95),(4,100.40))` | `372.80` |
 | 2 | Lista de vendas vazia | `()` | `0.0` |
 | 3 | Apenas uma venda | `((1, 100.00),)` | `100.00` |
+| 4 | Vendas com valores iguais de produtos diferentes | `((1, 75.00), (2, 75.00), (3, 75.00))` | `225.00` |
 
 ---
 
@@ -158,6 +165,7 @@ mes='1/22' → não há mês anterior → retorna None
 | 1 | Mês com aumento de vendas | `'2/22'` | `≈ 149.69` |
 | 2 | Mês com queda de vendas | `'3/22'` | `≈ -98.95` |
 | 3 | Primeiro mês da lista (sem mês anterior) | `'1/22'` | `None` |
+| 4 | Meses consecutivos com a mesma quantidade de vendas (variação zero) | histórico `(('5/22', 500.00), ('6/22', 500.00))`, mes `'6/22'` | `0.0` |
 
 ---
 
@@ -175,4 +183,4 @@ Ele contém as classes:
 - `TestCalcularTotalMensal`
 - `TestCalcularVariacaoMensal`
 
-Cada classe possui **3 métodos de teste**, conforme descrito acima.
+Cada classe possui `setUp` / `tearDown` para criação e destruição do banco em memória, e **métodos de teste** conforme descrito acima (sendo que as classes `TestVerificarReposicao` e `TestCalcularPercentualVendas` possuem 5 e 6 métodos, respectivamente, e `TestCalcularTotalMensal` e `TestCalcularVariacaoMensal` possuem 4 métodos cada).

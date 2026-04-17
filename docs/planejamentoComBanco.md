@@ -115,6 +115,7 @@ filtrar_produtos(conn, categoria='Limpeza')
 | 1 | Filtro por nome existente | `nome='Shampoo'` | Lista com 1 produto cujo nome é 'Shampoo' |
 | 2 | Filtro por código existente | `codigo='DT001'` | Lista com 1 produto cujo código é 'DT001' |
 | 3 | Filtro por categoria existente | `categoria='Higiene'` | Lista com 3 produtos da categoria 'Higiene' |
+| 4 | Filtro por categoria inexistente nos dados | `categoria='Beleza'` | Lista vazia `[]` |
 
 ---
 
@@ -172,6 +173,11 @@ listar_produtos_ordenados(conn)
 | 1 | Banco com produtos de categorias diferentes | Ordenação normal | A lista de categorias retornada está em ordem crescente |
 | 2 | Banco sem produtos (tabela vazia) | Sem registros | Retorna lista vazia `[]` |
 | 3 | Produtos da mesma categoria | Só 'Higiene' na tabela | Nomes dentro da categoria estão em ordem alfabética crescente |
+| 4 | Apenas uma categoria com todos os produtos | Todos os produtos cadastrados são da categoria 'Higiene' (nenhum de 'Limpeza') | Retorna todos os produtos em ordem alfabética de nome; nenhum produto da categoria 'Limpeza' aparece no resultado |
+| 5 | Entrada parcial para nome do produto (`sh` → 'Shampoo') | Busca com trecho do nome via parâmetro `nome='sh'` em `filtrar_produtos` | Retorna os produtos cujo nome contém 'sh' (ex.: Shampoo), validando suporte a correspondência parcial (`LIKE '%sh%'`) |
+
+> **Nota (caso 4):** Para isolar este cenário, o `setUp` deve popular o banco somente com produtos da categoria 'Higiene', sem nenhum produto da categoria 'Limpeza'.  
+> **Nota (caso 5):** Embora a busca por entrada parcial seja testada aqui no contexto da ordenação, ela utiliza a função `filtrar_produtos` (caso 1) com suporte a `LIKE`. Certifique-se de que a implementação de `filtrar_produtos` aceita padrões parciais além de valores exatos.
 
 ---
 
@@ -200,6 +206,9 @@ listar_vendas_responsavel(conn, 'Ana Silva')
 | 1 | Responsável com múltiplas vendas | `'Ana Silva'` | Lista com ids 1 e 2 (2 itens) |
 | 2 | Nome não cadastrado no banco | `'Pessoa Inexistente'` | Lista vazia `[]` |
 | 3 | Responsável com apenas uma venda | `'Bruno Souza'` | Lista com id 3 (1 item) |
+| 4 | Entrada parcial — retorna vendas de todos os usuários cujo nome contém o trecho informado (`'ana'` → Ana Clara, Juliana) | `'ana'` | Lista com ids das vendas de todos os usuários cujo nome contenha 'ana' (busca com `LIKE '%ana%'`, insensível a maiúsculas/minúsculas) |
+
+> **Nota (caso 4):** Para este cenário o `setUp` deve incluir usuários adicionais, por exemplo `(4,'Ana Clara','Rua D, 100','vendedor')` e `(5,'Juliana Ferreira','Rua E, 200','vendedor')`, e vendas associadas a eles, de modo que a busca por `'ana'` retorne resultados de ambos.
 
 ---
 
@@ -217,4 +226,4 @@ Ele contém as classes:
 - `TestListarProdutosOrdenados`
 - `TestListarVendasResponsavel`
 
-Cada classe possui `setUp` / `tearDown` para criação e destruição do banco em memória, e **3 métodos de teste**, conforme descrito acima.
+Cada classe possui `setUp` / `tearDown` para criação e destruição do banco em memória, e **métodos de teste** conforme descrito acima (`TestFiltrarProdutos` com 4 métodos, `TestListarProdutosVenda` com 3 métodos, `TestListarProdutosOrdenados` com 5 métodos e `TestListarVendasResponsavel` com 4 métodos).
