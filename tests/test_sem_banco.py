@@ -35,6 +35,19 @@ class TestVerificarReposicao(unittest.TestCase):
         resultado = verificar_reposicao(produtos)
         self.assertEqual(resultado, 0)
 
+    def test_todos_precisam_reposicao(self):
+        """Todos os produtos com quantidade < 5 devem ser contados."""
+        produtos = (('Shampoo', 1), ('Condicionador', 3), ('Sabonete', 0))
+        resultado = verificar_reposicao(produtos)
+        self.assertEqual(resultado, 3)
+
+    def test_entrada_invalida_quantidade_negativa(self):
+        """Quantidade negativa deve lançar exceção com mensagem 'Dado inválido'."""
+        produtos = (('Shampoo', -2), ('Condicionador', 3))
+        with self.assertRaises(ValueError) as ctx:
+            verificar_reposicao(produtos)
+        self.assertEqual(str(ctx.exception), 'Dado inválido')
+
 
 class TestCalcularPercentualVendas(unittest.TestCase):
     """Testes para a função calcular_percentual_vendas(vendas, produtos_ids).
@@ -77,6 +90,33 @@ class TestCalcularPercentualVendas(unittest.TestCase):
         resultado_dict = dict(resultado)
         self.assertAlmostEqual(resultado_dict[1], 1.0, places=4)
 
+    def test_dois_produtos_mesmo_percentual(self):
+        """Dois produtos com mesma quantidade total vendida devem ter 50% cada."""
+        vendas = ((1, 1, 3), (1, 2, 3))
+        produtos_ids = [1, 2]
+        resultado = calcular_percentual_vendas(vendas, produtos_ids)
+        resultado_dict = dict(resultado)
+        self.assertAlmostEqual(resultado_dict[1], 0.5, places=4)
+        self.assertAlmostEqual(resultado_dict[2], 0.5, places=4)
+
+    def test_vendas_diferentes_mesma_quantidade(self):
+        """Vendas distintas com mesma quantidade por produto: percentuais iguais."""
+        vendas = ((1, 1, 2), (2, 2, 2), (3, 3, 2))
+        produtos_ids = [1, 2, 3]
+        resultado = calcular_percentual_vendas(vendas, produtos_ids)
+        resultado_dict = dict(resultado)
+        self.assertAlmostEqual(resultado_dict[1], 1/3, places=4)
+        self.assertAlmostEqual(resultado_dict[2], 1/3, places=4)
+        self.assertAlmostEqual(resultado_dict[3], 1/3, places=4)
+
+    def test_mesmo_produto_vendas_distintas(self):
+        """Mesmo produto em vendas distintas: soma das quantidades = 100%."""
+        vendas = ((1, 1, 2), (2, 1, 8))
+        produtos_ids = [1]
+        resultado = calcular_percentual_vendas(vendas, produtos_ids)
+        resultado_dict = dict(resultado)
+        self.assertAlmostEqual(resultado_dict[1], 1.0, places=4)
+
 
 class TestCalcularTotalMensal(unittest.TestCase):
     """Testes para a função calcular_total_mensal(vendas).
@@ -101,6 +141,12 @@ class TestCalcularTotalMensal(unittest.TestCase):
         vendas = ((1, 100.00),)
         resultado = calcular_total_mensal(vendas)
         self.assertAlmostEqual(resultado, 100.00, places=2)
+
+    def test_vendas_com_valores_iguais(self):
+        """Vendas com valores iguais de produtos diferentes."""
+        vendas = ((1, 75.00), (2, 75.00), (3, 75.00))
+        resultado = calcular_total_mensal(vendas)
+        self.assertAlmostEqual(resultado, 225.00, places=2)
 
 
 class TestCalcularVariacaoMensal(unittest.TestCase):
@@ -149,6 +195,12 @@ class TestCalcularVariacaoMensal(unittest.TestCase):
         )
         resultado = calcular_variacao_mensal(historico, '1/22')
         self.assertIsNone(resultado)
+
+    def test_variacao_zero(self):
+        """Meses consecutivos com mesmo valor resultam em variação zero."""
+        historico = (('5/22', 500.00), ('6/22', 500.00))
+        resultado = calcular_variacao_mensal(historico, '6/22')
+        self.assertAlmostEqual(resultado, 0.0, places=2)
 
 
 if __name__ == '__main__':

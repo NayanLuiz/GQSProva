@@ -149,6 +149,11 @@ class TestFiltrarProdutos(unittest.TestCase):
         for produto in resultado:
             self.assertEqual(produto[3], 'Higiene')
 
+    def test_filtrar_por_categoria_inexistente(self):
+        """Busca por categoria inexistente deve retornar lista vazia."""
+        resultado = filtrar_produtos(self.conn, categoria='Beleza')
+        self.assertEqual(len(resultado), 0)
+
 
 class TestListarProdutosVenda(unittest.TestCase):
     """Testes para a função listar_produtos_venda(conn, id_venda).
@@ -215,6 +220,32 @@ class TestListarProdutosOrdenados(unittest.TestCase):
         nomes = [r[1] for r in higiene]
         self.assertEqual(nomes, sorted(nomes))
 
+    def test_apenas_uma_categoria(self):
+        """Quando só existem produtos de uma categoria, retorna todos em ordem de nome."""
+        conn_uma_cat = criar_banco_somente_schema()
+        cursor = conn_uma_cat.cursor()
+        cursor.executemany('INSERT INTO Produto VALUES (?, ?, ?, ?, ?, ?)', [
+            (1, 'Shampoo',       'SH001', 'Higiene', 12.90, 10),
+            (2, 'Condicionador', 'CD001', 'Higiene', 15.90,  5),
+            (3, 'Sabonete',      'SB001', 'Higiene',  3.50,  2),
+        ])
+        conn_uma_cat.commit()
+        resultado = listar_produtos_ordenados(conn_uma_cat)
+        self.assertEqual(len(resultado), 3)
+        nomes = [r[1] for r in resultado]
+        self.assertEqual(nomes, sorted(nomes))
+        # Nenhum produto da categoria 'Limpeza' aparece
+        categorias = [r[3] for r in resultado]
+        self.assertNotIn('Limpeza', categorias)
+        conn_uma_cat.close()
+
+    def test_entrada_parcial_nome(self):
+        """Busca parcial com 'sh' via filtrar_produtos deve retornar Shampoo."""
+        resultado = filtrar_produtos(self.conn, nome='sh')
+        self.assertGreater(len(resultado), 0)
+        nomes = [r[1] for r in resultado]
+        self.assertIn('Shampoo', nomes)
+
 
 class TestListarVendasResponsavel(unittest.TestCase):
     """Testes para a função listar_vendas_responsavel(conn, nome_responsavel).
@@ -246,6 +277,28 @@ class TestListarVendasResponsavel(unittest.TestCase):
         resultado = listar_vendas_responsavel(self.conn, 'Bruno Souza')
         self.assertEqual(len(resultado), 1)
         self.assertEqual(resultado[0][0], 3)
+
+    def test_entrada_parcial_nome_responsavel(self):
+        """Busca parcial por 'ana' retorna vendas de todos cujo nome contém 'ana'."""
+        # Adiciona usuários e vendas extras para este cenário
+        cursor = self.conn.cursor()
+        cursor.executemany('INSERT INTO Usuario VALUES (?, ?, ?, ?)', [
+            (4, 'Ana Clara',         'Rua D, 100', 'vendedor'),
+            (5, 'Juliana Ferreira',  'Rua E, 200', 'vendedor'),
+        ])
+        cursor.executemany('INSERT INTO Venda VALUES (?, ?, ?)', [
+            (4, 4, 80.00),
+            (5, 5, 55.00),
+        ])
+        self.conn.commit()
+
+        resultado = listar_vendas_responsavel(self.conn, 'ana')
+        ids = [r[0] for r in resultado]
+        # Deve incluir vendas de Ana Silva (1,2), Ana Clara (4) e Juliana (5)
+        self.assertIn(1, ids)
+        self.assertIn(2, ids)
+        self.assertIn(4, ids)
+        self.assertIn(5, ids)
 
 
 if __name__ == '__main__':
